@@ -2,10 +2,76 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Teste</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal 501</title>
+  <style>
+    body{font-family:Arial;background:#f4f6f8;padding:20px;color:#222}
+    .box{max-width:800px;margin:auto;background:white;padding:24px;border-radius:16px}
+    button{padding:12px 16px;border:0;border-radius:10px;background:#1a73e8;color:white;font-weight:bold}
+    .card{border:1px solid #ddd;border-radius:12px;padding:16px;margin-top:16px}
+    .ok{color:green;font-weight:bold}
+    .erro{color:#b00020;font-weight:bold}
+  </style>
 </head>
 <body>
-  <h1>TESTE DO PORTAL 501</h1>
-  <p>Se você está vendo isso, a Vercel está funcionando.</p>
+  <div class="box">
+    <h1>Portal de Atividades — 5º Ano</h1>
+    <p><strong>Professor:</strong> Thiago Miranda Pereira</p>
+    <p><strong>Escola:</strong> CIEP Doutor Ernesto Che Guevara</p>
+    <p><strong>Turma:</strong> 501</p>
+
+    <div class="card">
+      <h2>Status do sistema</h2>
+      <p id="status">Testando conexão online...</p>
+      <button onclick="testar()">Testar novamente</button>
+    </div>
+
+    <div class="card">
+      <h2>Dados carregados</h2>
+      <div id="dados">Aguardando...</div>
+    </div>
+  </div>
+
+<script>
+const URL = "https://aabdxrputomvnrwfevvx.supabase.co/rest/v1/";
+const KEY = "sb_publishable_MkhvW-SAXcNs2tCP4LA3wA_PMMvOlLv";
+
+async function buscar(tabela){
+  const resposta = await fetch(URL + tabela + "?select=*", {
+    headers: {
+      "apikey": KEY,
+      "Authorization": "Bearer " + KEY
+    }
+  });
+
+  if(!resposta.ok){
+    throw new Error(await resposta.text());
+  }
+
+  return await resposta.json();
+}
+
+async function testar(){
+  const status = document.getElementById("status");
+  const dados = document.getElementById("dados");
+
+  try{
+    status.innerHTML = "Conectando...";
+    const alunos = await buscar("alunos");
+    const atividades = await buscar("atividades");
+
+    status.innerHTML = "<span class='ok'>Sistema online conectado ao Supabase.</span>";
+    dados.innerHTML =
+      "<p><strong>Alunos cadastrados:</strong> " + alunos.length + "</p>" +
+      "<p><strong>Atividades cadastradas:</strong> " + atividades.length + "</p>" +
+      "<p><strong>Primeiro aluno:</strong> " + (alunos[0] ? alunos[0].nome : "nenhum") + "</p>";
+  }catch(erro){
+    status.innerHTML = "<span class='erro'>Erro na conexão.</span>";
+    dados.innerText = erro.message;
+  }
+}
+
+testar();
+</script>
 </body>
 </html>
